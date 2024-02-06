@@ -30,7 +30,6 @@ public class BinaryOperateNode extends Expr {
         };
     }
 
-    @Override
     public String toString() {
         return String.format("(%s %s %s)", left.toString(), operator, right.toString());
     }

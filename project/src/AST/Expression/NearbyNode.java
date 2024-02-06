@@ -12,12 +12,12 @@ public class NearbyNode extends Expr {
         this.dir = dir;
     }
 
-    @Override
+
     public long eval(GameCommand gamecmd) {
         return gamecmd.nearby(dir);
     }
 
-    @Override
+
     public String toString() {
         return "nearby " + dir;
     }
