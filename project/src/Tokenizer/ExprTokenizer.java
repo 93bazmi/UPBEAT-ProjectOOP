@@ -6,95 +6,105 @@ public class ExprTokenizer implements Tokenizer {
     private String prev;
     private int pos;
 
-    public  ExprTokenizer(String src){
+    public ExprTokenizer(String src){
         this.src = src;
-        pos = 0 ;
-        computeNext();
+        pos = 0;
+        compute();
     }
 
-
-    public boolean hasNextToken(){
-        return next != null ;
+    @Override
+    public boolean hasNextToken() {
+        return next != null;
     }
 
-    //peek : Returns the next token
-    public String peek() {
-        if (next == null){
+    @Override
+    public String consume() {
+        if (!hasNextToken())
             throw new TokenException.NoMoreToken(prev);
-        }
-        return next ;
-    }
-    public boolean peek(String str){
-        if(!hasNextToken()){
-            return false ;
-        } else  {
-            return  next.equals(str);
-        }
-    }
-
-    //consume effects : removes the next token
-    public  String consume(){
-        if(hasNextToken())
-            throw new TokenException.NoMoreToken(prev);
-        String result = next ;
-        computeNext();
+        String result = next;
+        compute();
         return result;
     }
 
-    public boolean consume(String str){
-        if(!hasNextToken()){
+    @Override
+    public boolean consume(String str) {
+        if (!hasNextToken()) {
             throw new TokenException.NoMoreToken(prev);
-        }else {
-            if (next.equals(str)){
-                computeNext();
-                return true ;
+        } else {
+            if (next.equals(str)) {
+                compute();
+                return true;
             } else {
-                return false ;
+                return false;
             }
         }
     }
 
-    private void CommentLineCal() { //ทำจนกว่าจะเจอ \n
-        while (pos<src.length() && src.charAt(pos) != '\n') {
+    @Override
+    public String peek() {
+        if (next == null)
+            throw new TokenException.NoMoreToken(prev);
+        return next;
+    }
+
+    @Override
+    public boolean peek(String str) {
+        if (!hasNextToken()) {
+            return false;
+        } else {
+            return next.equals(str);
+        }
+    }
+
+    private void CommentLineCal() {
+        while (pos < src.length() && src.charAt(pos) != '\n') {
             pos++;
         }
     }
-    private boolean ignoreCommentChar(char c){ //return true เมื่อเจอช่องว่าง,#,"
-        return Character.isWhitespace(c) || c == '#' || c == '"' ;
+
+    private boolean ignoreCommentChar(char c) {
+        return Character.isWhitespace(c) || c == '#' || c == '"';
     }
 
-    private void  computeNext(){
-        if(src == null) return;
-        StringBuilder s = new StringBuilder();
-        while (pos<src.length() && ignoreCommentChar(src.charAt(pos))){
-            if(src.charAt(pos) == '#') {
+    private boolean isLetter(char c) {
+        return Character.isLetter(c) || c == '_';
+    }
+
+    private void compute() {
+        if (src == null) return;
+        StringBuilder sb = new StringBuilder();
+        while (pos < src.length() && ignoreCommentChar(src.charAt(pos))) {
+            if (src.charAt(pos) == '#')
                 CommentLineCal();
-            } else {
-                pos++ ;
-            }
+            else
+                pos++;
         }
-        if (pos == src.length()){ //no more token
+
+        if (pos == src.length()) {
             prev = next;
             next = null;
             return;
         }
-        String Operand = "()+-*/^{}=";
         char c = src.charAt(pos);
-        if(Character.isLetter(c)){ //ตรวจสอบว่าอักขระ c เป็นตัวอักษรหรือไม่ โดยใช้เมธอด Character.isLetter(c)
-            while (pos<src.length() && Character.isLetter(src.charAt(pos))){
-                s.append(src.charAt(pos));
+        if (Character.isDigit(c)) {
+            while (pos < src.length() && Character.isDigit(src.charAt(pos))) {
+                sb.append(src.charAt(pos));
                 pos++;
             }
-        } else if(Operand.contains(String.valueOf(c))){ //ตรวจสอบว่าตัวอักษรที่ตำแหน่ง pos ใน src มีอยู่ใน Operand('+', '-', '*', '/') หรือไม่
-            s.append(src.charAt(pos));
+        } else if (isLetter(c) || c == '_') {
+            while (pos < src.length() && isLetter(src.charAt(pos))) {
+                sb.append(src.charAt(pos));
+                pos++;
+            }
+        } else if ("()+-*/%^{}=".contains(String.valueOf(c))) {
+            sb.append(src.charAt(pos));
             pos++;
         } else {
-            throw new TokenException.ExceptChar(c) ;
+            throw new TokenException.ExceptChar(c);
         }
         prev = next;
-        next = s.toString();
+        next = sb.toString();
     }
 
+
 }
-
-
