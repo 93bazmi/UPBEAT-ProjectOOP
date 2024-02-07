@@ -48,18 +48,18 @@ public class GameParser {
     }
 
     public StateNode Parse(){
-        StateNode parse = parsePlan();
+        StateNode nodes = parsePlan();
         if(tkz.hasNextToken()){
             throw new Exception_AST.UnExceptTokenException(tkz.peek());
         }
-        return parse;
+        return nodes;
     }
 
     // 1. Plan → Statement+
     private StateNode parsePlan(){
-        StateNode parse = parseStatement();
-        parse.nextState = parseManyStatement();
-        return parse;
+        StateNode current = parseStatement();
+        current.nextState = parseManyStatement();
+        return current;
     }
 
     // 2. Statement → Command | BlockStatement | IfStatement | WhileStatement
@@ -230,7 +230,7 @@ public class GameParser {
     // 16. Power → <number> | <identifier> | ( Expression ) | InfoExpression
     private Expr parsePower() {
         if (Character.isDigit(tkz.peek().charAt(0))) {
-            return null; //CalculateNode on AST!
+            return null;
         } else if (tkz.peek("opponent") || tkz.peek("nearby")) {
             return parseInfoExpression();
         } else if (tkz.peek("(")) {
@@ -239,7 +239,7 @@ public class GameParser {
             tkz.consume(")");
             return expr;
         }
-        return null; //CalculateNode on AST!
+        return null;
     }
 
     // 17. InfoExpression → opponent | nearby Direction
@@ -255,7 +255,4 @@ public class GameParser {
             throw new InvalidInfoExpression(tkz.peek());
         }
     }
-
-
-
 }
