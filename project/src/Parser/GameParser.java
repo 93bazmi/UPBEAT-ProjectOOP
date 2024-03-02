@@ -1,17 +1,15 @@
 package Parser;
 
-import AST.Expression.BinaryOperateNode;
-import AST.Expression.NearbyNode;
+import AST.Expression.*;
 import AST.Node.*;
 import AST.Statement.*;
 import Game.Direction;
 import Tokenizer.ExprTokenizer;
 import Parser.ParserException.*;
-import AST.Expression.IdentifierNode;
-import AST.Expression.NumNode;
 
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class GameParser {
@@ -37,10 +35,16 @@ public class GameParser {
      */
 
     private final ExprTokenizer tkz ;
-    private final List<String> Commands = Arrays.asList("done","relocate","move","invest","collect","shoot");
-    private final List<String> Variables = Arrays.asList("if", "while", "done", "relocate", "move", "invest", "shoot", "up", "down", "upleft", "upright", "downleft", "downright"
-            , "if", "while", "then", "else", "opponent", "nearby"
-            , "rows", "cols", "currow", "curcol", "budget", "deposit", "int", "maxdeposit", "random"); // Special variables
+//    private final List<String> Commands = Arrays.asList("done","relocate","move","invest","collect","shoot");
+//    private final List<String> Variables = Arrays.asList("if", "while", "done", "relocate", "move", "invest", "shoot", "up", "down", "upleft", "upright", "downleft", "downright"
+//            , "if", "while", "then", "else", "opponent", "nearby"
+//            , "rows", "cols", "currow", "curcol", "budget", "deposit", "int", "maxdeposit", "random"); // Special variables
+    HashSet<String> Command = new HashSet<>(Arrays.asList("done", "relocate", "move", "invest", "collect", "shoot"));
+    HashSet<String> SpecialVariables = new HashSet<>(Arrays.asList("rows", "cols", "currow", "curcol", "budget", "deposit",
+            "int", "maxdeposit", "random"));
+    HashSet<String> NotUse = new HashSet<>(Arrays.asList("if", "while", "done", "relocate", "move", "invest", "shoot"
+            , "up", "down", "upleft", "upright", "downleft", "downright", "if", "while", "then", "else", "opponent", "nearby",
+            "rows", "cols", "currow", "curcol", "budget", "deposit", "int", "maxdeposit", "random"));
 
 
     public GameParser(ExprTokenizer tkz) {
@@ -133,7 +137,7 @@ public class GameParser {
 
     // 3. Command → AssignmentStatement | ActionCommand
     private StateNode parseCommand() {
-        if (Commands.contains(tkz.peek()))
+        if (Command.contains(tkz.peek()))
             return parseActionCommand();
         else
             return parseAssignmentStatement();
@@ -142,7 +146,7 @@ public class GameParser {
     // 4. AssignmentStatement → <identifier> = Expression
     private StateNode parseAssignmentStatement() {
         String identifier = tkz.consume();
-        if (Variables.contains(identifier))
+        if (NotUse.contains(identifier))
             throw new specVarIdentifier(identifier);
         if (tkz.peek("="))
             tkz.consume();
@@ -243,11 +247,15 @@ public class GameParser {
             return new NumNode(Long.parseLong(tkz.consume()));
         } else if (tkz.peek("opponent") || tkz.peek("nearby")) {
             return parseInfoExpression();
+        } else if (SpecialVariables.contains(tkz.peek())){
+            return new SpecialVariablesNode(tkz.consume());
         } else if (tkz.peek("(")) {
             tkz.consume("(");
             Expr expr = parseExpression();
             tkz.consume(")");
             return expr;
+        }else if (Character.isAlphabetic(tkz.peek().charAt(0))) {
+            return new IdentifierNode(tkz.consume());
         }
         return null;
     }
