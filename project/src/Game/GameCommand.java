@@ -4,9 +4,9 @@ import java.util.Map;
 
 public interface GameCommand {
 
-    void attack(Direction dir, long v);
+    boolean attack(Direction dir, long v);
 
-    void collect(long v);
+    boolean collect(long v);
 
     void invest(long eval);
 
@@ -14,7 +14,7 @@ public interface GameCommand {
 
     long nearby(Direction dir);
 
-    void move(Direction dir);
+    boolean move(Direction dir);
 
     long opponent();
 
