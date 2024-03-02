@@ -19,4 +19,14 @@ public interface GameCommand {
     long opponent();
 
     Map<String, Long> getIdentifiers();
+    long getRow();
+    long getCol();
+    long getCityCrew_Row();
+    long getCitiCrew_Col();
+    long getBudget();
+    long getDeposit();
+    long getInterest();
+    long getMaxDeposit();
+    long getRandom();
+
 }
