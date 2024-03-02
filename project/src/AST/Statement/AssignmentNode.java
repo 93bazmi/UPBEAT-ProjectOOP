@@ -15,9 +15,9 @@ public class AssignmentNode extends StateNode {
         this.expression = expression;
     }
 
-    public StateNode execute(GameCommand gamecmd) {
+    public boolean execute(GameCommand gamecmd) {
         Map<String, Long> memory = gamecmd.getIdentifiers();
         memory.put(identifier, expression.eval(gamecmd));
-        return nextState;
+        return nextState.execute(gamecmd);
     }
 }

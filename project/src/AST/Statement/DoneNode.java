@@ -6,7 +6,7 @@ import static AST.Node.*;
 
 public class DoneNode extends StateNode {
 
-    public StateNode execute(GameCommand game) {
-        return null;
+    public boolean execute(GameCommand game) {
+        return true;
     }
 }

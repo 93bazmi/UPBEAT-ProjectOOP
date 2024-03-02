@@ -11,8 +11,7 @@ public class CollectNode extends StateNode {
     }
 
     @Override
-    public StateNode execute(GameCommand gamecmd) {
-        gamecmd.collect(expr.eval(gamecmd));
-        return nextState;
+    public boolean execute(GameCommand gamecmd) {
+        return gamecmd.collect(expr.eval(gamecmd));
     }
 }

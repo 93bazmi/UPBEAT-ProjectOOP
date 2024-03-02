@@ -13,6 +13,6 @@ public abstract class Node {
     public abstract static class StateNode extends Node {
 
         public StateNode nextState;
-        public abstract StateNode execute(GameCommand command);
+        public abstract boolean execute(GameCommand command);
     }
 }
