@@ -15,13 +15,13 @@ public class If_ElseNode extends StateNode {
     }
 
     @Override
-    public StateNode execute(GameCommand gamecmd) {
+    public boolean execute(GameCommand gamecmd) {
         trueNode.nextState = nextState;
         falseNode.nextState = nextState;
         if(condition.eval(gamecmd) > 0){
-            return trueNode;
+            return trueNode.execute(gamecmd);
         } else {
-            return falseNode;
+            return falseNode.execute(gamecmd);
         }
     }
 }

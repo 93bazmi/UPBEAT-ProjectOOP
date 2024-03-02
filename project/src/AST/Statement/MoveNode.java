@@ -13,8 +13,7 @@ public class MoveNode extends StateNode {
     }
 
     @Override
-    public StateNode execute(GameCommand gamecmd) {
-        gamecmd.move(direction);
-        return nextState;
+    public boolean execute(GameCommand gamecmd) {
+        return gamecmd.move(direction);
     }
 }

@@ -2,6 +2,8 @@ package Parser;
 
 import AST.Node.StateNode;
 
+import java.util.List;
+
 public interface Parser {
-    StateNode Parse();
+    List<StateNode> Parse();
 }

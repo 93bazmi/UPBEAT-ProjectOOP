@@ -15,11 +15,10 @@ public class AttackNode extends StateNode {
     }
 
     @Override
-    public StateNode execute(GameCommand gamecmd) {
-        gamecmd.attack(
+    public boolean execute(GameCommand gamecmd) {
+        return gamecmd.attack(
                 direction,
                 expression.eval(gamecmd)
         );
-        return nextState;
     }
 }

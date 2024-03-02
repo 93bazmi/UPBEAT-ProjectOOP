@@ -7,8 +7,11 @@ import AST.Statement.*;
 import Game.Direction;
 import Tokenizer.ExprTokenizer;
 import Parser.ParserException.*;
+import AST.Expression.IdentifierNode;
+import AST.Expression.NumNode;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GameParser {
@@ -47,8 +50,8 @@ public class GameParser {
         this.tkz = tkz;
     }
 
-    public StateNode Parse(){
-        StateNode nodes = parsePlan();
+    public List<StateNode> Parse(){
+        List<StateNode> nodes = parsePlan();
         if(tkz.hasNextToken()){
             throw new Exception_AST.UnExceptTokenException(tkz.peek());
         }
@@ -56,10 +59,11 @@ public class GameParser {
     }
 
     // 1. Plan → Statement+
-    private StateNode parsePlan(){
-        StateNode current = parseStatement();
-        current.nextState = parseManyStatement();
-        return current;
+    private List<StateNode> parsePlan(){
+        List<StateNode> plan = new ArrayList<>();
+        plan.add(parseStatement());
+        parseManyStatement(plan);
+        return plan;
     }
 
     // 2. Statement → Command | BlockStatement | IfStatement | WhileStatement
@@ -75,19 +79,24 @@ public class GameParser {
         }
     }
 
-    private StateNode parseManyStatement(){
-        StateNode root = null , node = null ;
-        while (!tkz.peek("}") && tkz.hasNextToken()) {
-            StateNode current = parseStatement();
-            if(root==null){
-                root = current;
-            }
-            if (root!=null){
-                node.nextState = current;
-                node = current ;
-            }
+//    private StateNode parseManyStatement(){
+//        StateNode root = null , node = null ;
+//        while (!tkz.peek("}") && tkz.hasNextToken()) {
+//            StateNode current = parseStatement();
+//            if(root==null){
+//                root = current;
+//            }
+//            if (root!=null){
+//                node.nextState = current;
+//                node = current ;
+//            }
+//        }
+//        return root;
+//}
+    private void parseManyStatement(List<StateNode> l){
+        while (tkz.hasNextToken() && !tkz.peek("}")) {
+            l.add(parseStatement()) ;
         }
-        return root;
     }
 
     // 11. IfStatement → if ( Expression ) then Statement else Statement
@@ -115,10 +124,11 @@ public class GameParser {
 
     // 10. BlockStatement → { Statement* }
     private StateNode parseBlockStatement() {
+        List<StateNode> block = new ArrayList<>();
         tkz.consume("{");
-        StateNode parse = parseManyStatement();
+        parseManyStatement(block);
         tkz.consume("}");
-        return parse;
+        return new BlockNode(block);
     }
 
     // 3. Command → AssignmentStatement | ActionCommand
@@ -230,7 +240,7 @@ public class GameParser {
     // 16. Power → <number> | <identifier> | ( Expression ) | InfoExpression
     private Expr parsePower() {
         if (Character.isDigit(tkz.peek().charAt(0))) {
-            return null;
+            return new NumNode(Long.parseLong(tkz.consume()));
         } else if (tkz.peek("opponent") || tkz.peek("nearby")) {
             return parseInfoExpression();
         } else if (tkz.peek("(")) {
