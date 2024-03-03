@@ -232,7 +232,7 @@ public class GameParser implements Parser{
     // 15. Factor → Power ^ Factor | Power
     private Expr parseFactor() {
         Expr left = parsePower();
-        if (tkz.peek("^")) {    // Fixed : (wrong associativity from last FeedBack)
+        if (tkz.peek("^")) {
             String operator = tkz.consume();
             Expr right = parseFactor();
             left = new BinaryOperateNode(left, operator, right); // BinaryOptNode on AST!
