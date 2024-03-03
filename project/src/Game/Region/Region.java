@@ -8,5 +8,7 @@ public interface Region {
     void updateDeposit(long amount);
     void updateOwner(Player owner);
     int getLocation();
-    long getNearby();
+    int getRow();
+    int getCol();
+    void SetLocation(int row, int col);
 }
