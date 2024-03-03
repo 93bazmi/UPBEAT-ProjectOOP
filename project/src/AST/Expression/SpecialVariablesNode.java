@@ -16,7 +16,7 @@ public class SpecialVariablesNode extends Expr {
             case "rows" -> gamecmd.getRow();
             case "cols" -> gamecmd.getCol();
             case "currow" -> gamecmd.getCityCrew_Row();
-            case "curcul" -> gamecmd.getCitiCrew_Col();
+            case "curcul" -> gamecmd.getCityCrew_Col();
             case "budget" -> gamecmd.getBudget();
             case "deposit" -> gamecmd.getDeposit();
             case "int" -> gamecmd.getInterest();
