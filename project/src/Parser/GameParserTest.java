@@ -88,7 +88,7 @@ public class GameParserTest {
 
     @Test
     public void TestReadFile() throws IOException {
-        Path fileName = Path.of("C:\\Users\\HP\\IdeaProjects\\UPBEAT-ProjectOOP\\project\\src\\Parser\\constructor_plan.text");
+        Path fileName = Path.of("C:\\Users\\Noppol Nunpiang\\IdeaProjects\\UPBEAT-ProjectOOP\\project\\src\\Parser\\constructor_plan.text");
         String str = Files.readString(fileName);
         parser = new GameParser((new ExprTokenizer(str)));
         assertDoesNotThrow(() -> parser.Parse());
