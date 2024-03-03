@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class GameParser {
+public class GameParser implements Parser{
 
     /* Grammar!
     Plan → Statement+
@@ -34,27 +34,29 @@ public class GameParser {
     InfoExpression → opponent | nearby Direction
      */
 
-    private final ExprTokenizer tkz ;
-//    private final List<String> Commands = Arrays.asList("done","relocate","move","invest","collect","shoot");
-//    private final List<String> Variables = Arrays.asList("if", "while", "done", "relocate", "move", "invest", "shoot", "up", "down", "upleft", "upright", "downleft", "downright"
-//            , "if", "while", "then", "else", "opponent", "nearby"
-//            , "rows", "cols", "currow", "curcol", "budget", "deposit", "int", "maxdeposit", "random"); // Special variables
-    HashSet<String> Command = new HashSet<>(Arrays.asList("done", "relocate", "move", "invest", "collect", "shoot"));
-    HashSet<String> SpecialVariables = new HashSet<>(Arrays.asList("rows", "cols", "currow", "curcol", "budget", "deposit",
-            "int", "maxdeposit", "random"));
-    HashSet<String> NotUse = new HashSet<>(Arrays.asList("if", "while", "done", "relocate", "move", "invest", "shoot"
+    private final ExprTokenizer tkz;
+    private final List<String> commands = Arrays.asList("done" , "relocate" , "move" , "invest" , "collect" , "shoot");
+    private final List<String> Variables = Arrays.asList("if", "while", "done", "relocate", "move", "invest", "shoot"
             , "up", "down", "upleft", "upright", "downleft", "downright", "if", "while", "then", "else", "opponent", "nearby",
-            "rows", "cols", "currow", "curcol", "budget", "deposit", "int", "maxdeposit", "random"));
+            "rows", "cols", "currow", "curcol", "budget", "deposit", "int", "maxdeposit", "random");
+
+    //    HashSet<String> Command = new HashSet<>(Arrays.asList("done", "relocate", "move", "invest", "collect", "shoot"));
+//    HashSet<String> SpecialVariables = new HashSet<>(Arrays.asList("rows", "cols", "currow", "curcol", "budget", "deposit",
+//            "int", "maxdeposit", "random"));
+//    HashSet<String> NotUse = new HashSet<>(Arrays.asList("if", "while", "done", "relocate", "move", "invest", "shoot"
+//            , "up", "down", "upleft", "upright", "downleft", "downright", "if", "while", "then", "else", "opponent", "nearby",
+//            "rows", "cols", "currow", "curcol", "budget", "deposit", "int", "maxdeposit", "random"));
 
 
-    public GameParser(ExprTokenizer tkz) {
+    public GameParser(ExprTokenizer tkz){
         if(!tkz.hasNextToken()){
             throw new NeedStatement();
         }
         this.tkz = tkz;
     }
 
-    public List<StateNode> Parse(){
+    @Override
+    public List<StateNode> Parse() {
         List<StateNode> nodes = parsePlan();
         if(tkz.hasNextToken()){
             throw new Exception_AST.UnExceptTokenException(tkz.peek());
@@ -71,14 +73,14 @@ public class GameParser {
     }
 
     // 2. Statement → Command | BlockStatement | IfStatement | WhileStatement
-    private StateNode parseStatement(){
-        if(tkz.peek("if")) {
+    private StateNode parseStatement() {
+        if(tkz.peek("if")){
             return parseIfStatement();
-        } else if (tkz.peek("while")) {
+        }else if(tkz.peek("while")){
             return parseWhileStatement();
-        } else if (tkz.peek("{")) {
+        }else if(tkz.peek("{")){
             return parseBlockStatement();
-        } else {
+        }else{
             return parseCommand();
         }
     }
@@ -98,13 +100,13 @@ public class GameParser {
 //        return root;
 //}
     private void parseManyStatement(List<StateNode> l){
-        while (tkz.hasNextToken() && !tkz.peek("}")) {
-            l.add(parseStatement()) ;
+        while(tkz.hasNextToken() && !tkz.peek("}")) {
+            l.add(parseStatement());
         }
     }
 
     // 11. IfStatement → if ( Expression ) then Statement else Statement
-    private StateNode parseIfStatement(){
+    private StateNode parseIfStatement() {
         tkz.consume("if");
         tkz.consume("(");
         Expr expr = parseExpression();
@@ -112,13 +114,13 @@ public class GameParser {
         tkz.consume("then");
         StateNode trueState = parseStatement();
         tkz.consume("else");
-        StateNode flaseState = parseStatement();
-        return new If_ElseNode(expr,trueState,flaseState); // IfElseNode on AST!
+        StateNode falseState= parseStatement();
+        return new If_ElseNode(expr, trueState, falseState); // IfElseNode on AST!
     }
 
     // 12. WhileStatement → while ( Expression ) Statement
     private StateNode parseWhileStatement() {
-        tkz.consume("While");
+        tkz.consume("while");
         tkz.consume("{");
         Expr expr = parseExpression();
         tkz.consume("}");
@@ -137,7 +139,7 @@ public class GameParser {
 
     // 3. Command → AssignmentStatement | ActionCommand
     private StateNode parseCommand() {
-        if (Command.contains(tkz.peek()))
+        if (commands.contains(tkz.peek()))
             return parseActionCommand();
         else
             return parseAssignmentStatement();
@@ -146,16 +148,15 @@ public class GameParser {
     // 4. AssignmentStatement → <identifier> = Expression
     private StateNode parseAssignmentStatement() {
         String identifier = tkz.consume();
-        if (NotUse.contains(identifier))
+        if (Variables.contains(identifier))
             throw new specVarIdentifier(identifier);
         if (tkz.peek("="))
             tkz.consume();
         else
             throw new NoSuchCommand(identifier);
         Expr expr= parseExpression();
-        return new AssignmentNode(identifier, expr); // AssignmentNode on AST!
+        return new AssignmentNode(identifier, expr);
     }
-
     // 5. ActionCommand → done | relocate | MoveCommand | RegionCommand | AttackCommand
     private StateNode parseActionCommand() {
         String command = tkz.consume();
@@ -200,14 +201,12 @@ public class GameParser {
         Expr expr = parseExpression();
         return new CollectNode(expr); // CollectNode on AST!
     }
-
     // 8.  ***AttackCommand → shoot Direction Expression
     private StateNode parseShootCommand() {
         Direction dir = parseDirection();
         Expr expr = parseExpression();
         return new AttackNode(expr,dir); // AttackNode on AST!
     }
-
     // 13. Expression → Expression + Term | Expression - Term | Term
     private Expr parseExpression() {
         Expr left = parseTerm();
@@ -233,7 +232,7 @@ public class GameParser {
     // 15. Factor → Power ^ Factor | Power
     private Expr parseFactor() {
         Expr left = parsePower();
-        while (tkz.peek("^")) {
+        if (tkz.peek("^")) {    // Fixed : (wrong associativity from last FeedBack)
             String operator = tkz.consume();
             Expr right = parseFactor();
             left = new BinaryOperateNode(left, operator, right); // BinaryOptNode on AST!
@@ -244,18 +243,16 @@ public class GameParser {
     // 16. Power → <number> | <identifier> | ( Expression ) | InfoExpression
     private Expr parsePower() {
         if (Character.isDigit(tkz.peek().charAt(0))) {
-            return new NumNode(Long.parseLong(tkz.consume()));
+            return new NumNode(Long.parseLong(tkz.consume())); // NumNode on AST!
         } else if (tkz.peek("opponent") || tkz.peek("nearby")) {
             return parseInfoExpression();
-        } else if (SpecialVariables.contains(tkz.peek())){
-            return new SpecialVariablesNode(tkz.consume());
         } else if (tkz.peek("(")) {
             tkz.consume("(");
             Expr expr = parseExpression();
             tkz.consume(")");
             return expr;
-        }else if (Character.isAlphabetic(tkz.peek().charAt(0))) {
-            return new IdentifierNode(tkz.consume());
+        }else if(Character.isAlphabetic(tkz.peek().charAt(0)) ){
+            return new IdentifierNode( tkz.consume() );
         }
         return null;
     }
@@ -264,13 +261,14 @@ public class GameParser {
     private Expr parseInfoExpression() {
         if (tkz.peek("opponent")) {
             tkz.consume();
-            return null; // EnemyNode on AST!
+            return new OpponentNode();
         } else if (tkz.peek("nearby")) {
             tkz.consume();
             Direction direction = parseDirection();
-            return new NearbyNode(direction); // NearbyNode on AST
+            return new NearbyNode(direction);
         } else {
             throw new InvalidInfoExpression(tkz.peek());
         }
     }
 }
+
