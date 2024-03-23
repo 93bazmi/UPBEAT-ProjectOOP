@@ -255,6 +255,9 @@ public class GameState implements GameCommand{
     public long getCityCrew_Col() {
         return cityCrew.getCol();
     }
+    public List<Region> getTerritory() {
+
+    }
 
     @Override
     public Region getCityCrew() {
