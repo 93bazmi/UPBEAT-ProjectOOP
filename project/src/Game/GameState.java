@@ -332,6 +332,9 @@ public class GameState implements GameCommand{
         Random ran = new Random();
         return ran.nextInt(100);
     }
+    private void Plan(String plan){
+
+    }
 
     @Override
     public Map<String, Long> getIdentifiers() {
