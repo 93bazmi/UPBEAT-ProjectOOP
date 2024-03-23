@@ -258,6 +258,10 @@ public class GameState implements GameCommand{
     public List<Region> getTerritory() {
 
     }
+    public Region getRegion() {
+
+    }
+
 
     @Override
     public Region getCityCrew() {
