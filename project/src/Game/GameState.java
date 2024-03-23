@@ -321,6 +321,12 @@ public class GameState implements GameCommand{
         }
     }
 
+
+    private Player checkWinner() {
+
+    }
+
+
     @Override
     public long getRandom() {
         Random ran = new Random();
