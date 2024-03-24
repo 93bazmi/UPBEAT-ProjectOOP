@@ -3,7 +3,7 @@ package AST.Expression;
 import AST.Node.*;
 import AST.Statement.Exception_AST;
 import Game.GameCommand;
-//import GameConfig.GameCommand;
+
 
 public class IdentifierNode extends Expr {
     private final String idf;
