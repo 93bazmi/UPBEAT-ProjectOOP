@@ -2,6 +2,7 @@ package Game;
 
 import Game.Region.Region;
 
+import java.util.List;
 import java.util.Map;
 
 public interface GameCommand {
@@ -21,6 +22,8 @@ public interface GameCommand {
     long getInterest();
     long getMaxDeposit();
     long getRandom();
+    List<Region> getTerritory();
+    Region getRegion(int location);
     Region getCityCrew();
     Map<String, Long> getIdentifiers();
 
