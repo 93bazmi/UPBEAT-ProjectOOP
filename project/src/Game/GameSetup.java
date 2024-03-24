@@ -13,14 +13,14 @@ public class GameSetup {
     private static long cols = 9;
 
     private static long init_plan_min = 10;
-
     private static long init_plan_sec = 0;
+
     private static long init_budget = 5000;
     private static long init_center_dep = 1000;
 
     private static long plan_rev_min = 5;
-
     private static long plan_rev_sec = 0;
+
     private static long rev_Cost = 500;
     private static long max_dep = 2500;
     private static long interest_pct = 5;

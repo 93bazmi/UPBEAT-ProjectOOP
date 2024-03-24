@@ -1,8 +1,12 @@
 package Game;
 
+import AST.Node;
 import Game.Player.Player;
 import Game.Region.GameRegion;
 import Game.Region.Region;
+import Parser.GameParser;
+import Parser.Parser;
+import Tokenizer.ExprTokenizer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +15,7 @@ import java.util.Random;
 
 public class GameState implements GameCommand{
     private final List<Player> players;
+    private final List<String> Plans = Arrays.asList("Plan1" , "Plan2");
     private final List<Region> territory;
     private final long Cost = 100;
     private Player curr_player;
@@ -256,10 +261,10 @@ public class GameState implements GameCommand{
         return cityCrew.getCol();
     }
     public List<Region> getTerritory() {
-
+        return this.territory;
     }
-    public Region getRegion() {
-
+    public Region getRegion(int location) {
+        return this.territory.get(location);
     }
 
 
@@ -323,7 +328,15 @@ public class GameState implements GameCommand{
 
 
     private Player checkWinner() {
-
+        if(getPlayers(0).getBudget() == 0)
+            return getPlayers(1);
+        else if(getPlayers(1).getBudget() == 0)
+            return getPlayers(0);
+        if(getPlayers(0).getCityCenter() == null)
+            return getPlayers(1);
+        else if(getPlayers(1).getCityCenter() == null)
+            return getPlayers(0);
+        return null;
     }
 
 
@@ -332,10 +345,30 @@ public class GameState implements GameCommand{
         Random ran = new Random();
         return ran.nextInt(100);
     }
+
+
     private void Plan(String plan){
-
+        Parser parser = new GameParser(new ExprTokenizer(plan));
+        List<Node.StateNode> nodes = parser.Parse();
+        if(turn % 2 == 0){
+            if(Plans.get(1) == null) {
+                Plans.add(1 , plan);
+            } else if(!Plans.get(1).equals(plan)) {
+                curr_player.updateBudget(-GameSetup.getRev_Cost());
+                Plans.add(1 , plan);
+            }
+        }else{
+            if(Plans.get(0) == null) {
+                Plans.add(0 , plan);
+            } else if(!Plans.get(0).equals(plan)) {
+                curr_player.updateBudget(-GameSetup.getRev_Cost());
+                Plans.add(0 , plan);
+            }
+        }
+        for(Node.StateNode node : nodes){
+            node.execute(this);
+        }
     }
-
     @Override
     public Map<String, Long> getIdentifiers() {
         return curr_player.getIdentifiers();
